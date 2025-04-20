@@ -53,22 +53,25 @@
       border-radius: 8px;
       padding: 1rem;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      max-width: 300px;
     }
     label {
       display: block;
       margin: 0.5rem 0 0.2rem;
     }
-    input[type="text"] {
+    input[type="text"], input[type="color"] {
       width: 100%;
       padding: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    input[type="color"] {
       margin-bottom: 1rem;
     }
     button {
       padding: 0.5rem 1rem;
       margin-right: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .section-divider {
+      border-top: 1px solid #ccc;
+      margin: 1rem 0;
     }
   </style>
 </head>
@@ -88,6 +91,12 @@
         <button id="saveBtn">Save</button>
         <button onclick="editDialog.close()">Cancel</button>
       </div>
+
+      <div class="section-divider"></div>
+      <label>Conquer This Tile</label>
+      <input type="text" id="conquerPlayerInput" placeholder="Conqueror name" />
+      <input type="color" id="conquerColorInput" />
+      <button type="button" id="conquerBtn">Conquer</button>
     </form>
   </dialog>
 
@@ -97,7 +106,10 @@
     const categoryInput = document.getElementById("categoryInput");
     const playerInput = document.getElementById("playerInput");
     const colorInput = document.getElementById("colorInput");
+    const conquerPlayerInput = document.getElementById("conquerPlayerInput");
+    const conquerColorInput = document.getElementById("conquerColorInput");
     const saveBtn = document.getElementById("saveBtn");
+    const conquerBtn = document.getElementById("conquerBtn");
 
     const tiles = Array.from({ length: 16 }, (_, i) => ({
       category: `Category ${i + 1}`,
@@ -130,6 +142,8 @@
           categoryInput.value = tile.category;
           playerInput.value = tile.player;
           colorInput.value = tile.color;
+          conquerPlayerInput.value = '';
+          conquerColorInput.value = '#ffffff';
           dialog.showModal();
         };
 
@@ -147,7 +161,17 @@
       }
     };
 
+    conquerBtn.onclick = () => {
+      if (currentTileIndex !== null && conquerPlayerInput.value.trim()) {
+        tiles[currentTileIndex].player = conquerPlayerInput.value;
+        tiles[currentTileIndex].color = conquerColorInput.value;
+        renderGrid();
+        dialog.close();
+      }
+    };
+
     renderGrid();
   </script>
 </body>
 </html>
+
