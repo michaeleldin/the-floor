@@ -86,15 +86,6 @@
       color: white;
       font-weight: bold;
     }
-    .points {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      font-size: 0.8rem;
-      background: rgba(0, 0, 0, 0.1);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-    }
   </style>
 </head>
 <body>
@@ -141,8 +132,7 @@
     const tiles = Array.from({ length: 16 }, (_, i) => ({
       category: `Category ${i + 1}`,
       player: '',
-      color: "#ffffff",
-      points: 0
+      color: "#ffffff"
     }));
 
     let currentTileIndex = null;
@@ -193,13 +183,8 @@
         playerEl.className = "player";
         playerEl.textContent = tile.player;
 
-        const pointsEl = document.createElement("div");
-        pointsEl.className = "points";
-        pointsEl.textContent = `${tile.points} pts`;
-
         tileEl.appendChild(categoryEl);
         tileEl.appendChild(playerEl);
-        tileEl.appendChild(pointsEl);
 
         tileEl.onclick = () => {
           currentTileIndex = i;
@@ -218,7 +203,7 @@
         const selectedPlayer = playerSelect.value;
         const selectedCategory = categoryInput.value;
 
-        // Enforce one category per player
+        // Set same category for all this player's tiles
         tiles.forEach(tile => {
           if (tile.player === selectedPlayer) {
             tile.category = selectedCategory;
@@ -228,7 +213,6 @@
         tiles[currentTileIndex].category = selectedCategory;
         tiles[currentTileIndex].player = selectedPlayer;
         tiles[currentTileIndex].color = getPlayerColor(selectedPlayer);
-        tiles[currentTileIndex].points += 1;
         renderGrid();
         dialog.close();
       }
@@ -240,7 +224,6 @@
         const conquerorCategory = getPlayerCategory(conqueror);
         tiles[currentTileIndex].player = conqueror;
         tiles[currentTileIndex].color = getPlayerColor(conqueror);
-        tiles[currentTileIndex].points = Math.max(tiles[currentTileIndex].points - 1, 0);
         if (conquerorCategory) {
           tiles[currentTileIndex].category = conquerorCategory;
         }
@@ -250,7 +233,12 @@
     };
 
     function pickRandomPlayer() {
-      const random = players[Math.floor(Math.random() * players.length)];
+      const activePlayers = players.filter(p => tiles.some(t => t.player === p.name));
+      if (activePlayers.length === 0) {
+        alert("No active players with tiles.");
+        return;
+      }
+      const random = activePlayers[Math.floor(Math.random() * activePlayers.length)];
       alert(`🎉 ${random.name} was chosen to play!`);
     }
 
