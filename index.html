@@ -42,6 +42,19 @@
     .tile:hover {
       transform: scale(1.03);
     }
+    .tile:hover::after {
+      content: attr(data-category);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
     .category {
       font-weight: bold;
       margin-bottom: 0.5rem;
@@ -65,6 +78,9 @@
       padding: 0.5rem;
       margin-bottom: 1rem;
     }
+    select option[data-color] {
+      background-color: transparent;
+    }
     button {
       padding: 0.5rem 1rem;
       margin: 0.5rem;
@@ -86,11 +102,16 @@
       color: white;
       font-weight: bold;
     }
+    .no-border-top { border-top: none !important; }
+    .no-border-right { border-right: none !important; }
+    .no-border-bottom { border-bottom: none !important; }
+    .no-border-left { border-left: none !important; }
   </style>
 </head>
 <body>
   <h1>The Floor</h1>
   <button onclick="pickRandomPlayer()">🎲 Pick Random Player</button>
+  <button onclick="pickRandomTile()">📦 Pick Random Tile</button>
   <div class="player-list" id="playerList"></div>
   <div class="grid" id="grid"></div>
 
@@ -150,10 +171,15 @@
 
     function populateSelect(selectElement) {
       selectElement.innerHTML = '';
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Unassigned';
+      selectElement.appendChild(defaultOption);
       players.forEach(player => {
         const option = document.createElement('option');
         option.value = player.name;
         option.textContent = player.name;
+        option.dataset.color = player.color;
         selectElement.appendChild(option);
       });
     }
@@ -174,6 +200,7 @@
         const tileEl = document.createElement("div");
         tileEl.className = "tile";
         tileEl.style.backgroundColor = tile.color;
+        tileEl.setAttribute('data-category', tile.category);
 
         const categoryEl = document.createElement("div");
         categoryEl.className = "category";
@@ -186,11 +213,24 @@
         tileEl.appendChild(categoryEl);
         tileEl.appendChild(playerEl);
 
+        const row = Math.floor(i / 4);
+        const col = i % 4;
+        const top = (row > 0) ? tiles[i - 4] : null;
+        const left = (col > 0) ? tiles[i - 1] : null;
+        const right = (col < 3) ? tiles[i + 1] : null;
+        const bottom = (row < 3) ? tiles[i + 4] : null;
+
+        if (top && top.player === tile.player) tileEl.classList.add("no-border-top");
+        if (left && left.player === tile.player) tileEl.classList.add("no-border-left");
+        if (right && right.player === tile.player) tileEl.classList.add("no-border-right");
+        if (bottom && bottom.player === tile.player) tileEl.classList.add("no-border-bottom");
+
         tileEl.onclick = () => {
           currentTileIndex = i;
           categoryInput.value = tile.category;
           playerSelect.value = tile.player;
           conquerPlayerSelect.value = '';
+          highlightSelectOption(playerSelect, tile.player);
           dialog.showModal();
         };
 
@@ -198,12 +238,18 @@
       });
     }
 
+    function highlightSelectOption(select, selectedName) {
+      for (const option of select.options) {
+        option.style.backgroundColor = option.value === selectedName ? getPlayerColor(option.value) : '';
+        option.style.color = option.value === selectedName ? '#fff' : '';
+      }
+    }
+
     saveBtn.onclick = () => {
       if (currentTileIndex !== null) {
         const selectedPlayer = playerSelect.value;
         const selectedCategory = categoryInput.value;
 
-        // Set same category for all this player's tiles
         tiles.forEach(tile => {
           if (tile.player === selectedPlayer) {
             tile.category = selectedCategory;
@@ -240,6 +286,23 @@
       }
       const random = activePlayers[Math.floor(Math.random() * activePlayers.length)];
       alert(`🎉 ${random.name} was chosen to play!`);
+    }
+
+    function pickRandomTile() {
+      const claimedTiles = tiles
+        .map((t, i) => ({ ...t, index: i }))
+        .filter(t => t.player);
+      if (claimedTiles.length === 0) {
+        alert("No claimed tiles to choose from.");
+        return;
+      }
+      const random = claimedTiles[Math.floor(Math.random() * claimedTiles.length)];
+      currentTileIndex = random.index;
+      categoryInput.value = random.category;
+      playerSelect.value = random.player;
+      conquerPlayerSelect.value = '';
+      highlightSelectOption(playerSelect, random.player);
+      dialog.showModal();
     }
 
     populateSelect(playerSelect);
