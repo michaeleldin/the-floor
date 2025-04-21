@@ -113,10 +113,10 @@
 
   <script>
     const players = [
-      { name: "מיכאל", color: "#e74c3c" },
-      { name: "גתית", color: "#3498db" },
-      { name: "לוי", color: "#27ae60" },
-      { name: "יעלי", color: "#f39c12" }
+      { name: "Alice", color: "#e74c3c" },
+      { name: "Bob", color: "#3498db" },
+      { name: "Charlie", color: "#27ae60" },
+      { name: "Diana", color: "#f39c12" }
     ];
 
     const grid = document.getElementById("grid");
@@ -162,6 +162,11 @@
       return player ? player.color : '#ffffff';
     }
 
+    function getPlayerCategory(name) {
+      const tile = tiles.find(t => t.player === name);
+      return tile ? tile.category : '';
+    }
+
     function renderGrid() {
       grid.innerHTML = "";
       tiles.forEach((tile, i) => {
@@ -195,7 +200,16 @@
     saveBtn.onclick = () => {
       if (currentTileIndex !== null) {
         const selectedPlayer = playerSelect.value;
-        tiles[currentTileIndex].category = categoryInput.value;
+        const selectedCategory = categoryInput.value;
+
+        // Enforce one category per player
+        tiles.forEach(tile => {
+          if (tile.player === selectedPlayer) {
+            tile.category = selectedCategory;
+          }
+        });
+
+        tiles[currentTileIndex].category = selectedCategory;
         tiles[currentTileIndex].player = selectedPlayer;
         tiles[currentTileIndex].color = getPlayerColor(selectedPlayer);
         renderGrid();
@@ -206,8 +220,12 @@
     conquerBtn.onclick = () => {
       if (currentTileIndex !== null) {
         const conqueror = conquerPlayerSelect.value;
+        const conquerorCategory = getPlayerCategory(conqueror);
         tiles[currentTileIndex].player = conqueror;
         tiles[currentTileIndex].color = getPlayerColor(conqueror);
+        if (conquerorCategory) {
+          tiles[currentTileIndex].category = conquerorCategory;
+        }
         renderGrid();
         dialog.close();
       }
