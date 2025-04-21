@@ -37,6 +37,7 @@
       cursor: pointer;
       transition: transform 0.2s;
       text-align: center;
+      position: relative;
     }
     .tile:hover {
       transform: scale(1.03);
@@ -85,6 +86,15 @@
       color: white;
       font-weight: bold;
     }
+    .points {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -113,10 +123,10 @@
 
   <script>
     const players = [
-      { name: "מיכאל", color: "#e74c3c" },
-      { name: "גתית", color: "#3498db" },
-      { name: "יעלי", color: "#27ae60" },
-      { name: "רחלי", color: "#f39c12" }
+      { name: "Alice", color: "#e74c3c" },
+      { name: "Bob", color: "#3498db" },
+      { name: "Charlie", color: "#27ae60" },
+      { name: "Diana", color: "#f39c12" }
     ];
 
     const grid = document.getElementById("grid");
@@ -132,6 +142,7 @@
       category: `Category ${i + 1}`,
       player: '',
       color: "#ffffff",
+      points: 0
     }));
 
     let currentTileIndex = null;
@@ -182,8 +193,13 @@
         playerEl.className = "player";
         playerEl.textContent = tile.player;
 
+        const pointsEl = document.createElement("div");
+        pointsEl.className = "points";
+        pointsEl.textContent = `${tile.points} pts`;
+
         tileEl.appendChild(categoryEl);
         tileEl.appendChild(playerEl);
+        tileEl.appendChild(pointsEl);
 
         tileEl.onclick = () => {
           currentTileIndex = i;
@@ -212,6 +228,7 @@
         tiles[currentTileIndex].category = selectedCategory;
         tiles[currentTileIndex].player = selectedPlayer;
         tiles[currentTileIndex].color = getPlayerColor(selectedPlayer);
+        tiles[currentTileIndex].points += 1;
         renderGrid();
         dialog.close();
       }
@@ -223,6 +240,7 @@
         const conquerorCategory = getPlayerCategory(conqueror);
         tiles[currentTileIndex].player = conqueror;
         tiles[currentTileIndex].color = getPlayerColor(conqueror);
+        tiles[currentTileIndex].points = Math.max(tiles[currentTileIndex].points - 1, 0);
         if (conquerorCategory) {
           tiles[currentTileIndex].category = conquerorCategory;
         }
