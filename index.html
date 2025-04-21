@@ -59,34 +59,46 @@
       display: block;
       margin: 0.5rem 0 0.2rem;
     }
-    input[type="text"], input[type="color"] {
+    input[type="text"], input[type="color"], select {
       width: 100%;
       padding: 0.5rem;
       margin-bottom: 1rem;
     }
     button {
       padding: 0.5rem 1rem;
-      margin-right: 0.5rem;
-      margin-top: 0.5rem;
+      margin: 0.5rem;
     }
     .section-divider {
       border-top: 1px solid #ccc;
       margin: 1rem 0;
     }
+    .player-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .player-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      margin: 0.3rem;
+      color: white;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h1>The Floor</h1>
+  <button onclick="pickRandomPlayer()">🎲 Pick Random Player</button>
+  <div class="player-list" id="playerList"></div>
   <div class="grid" id="grid"></div>
 
   <dialog id="editDialog">
     <form method="dialog">
       <label>Category</label>
       <input type="text" id="categoryInput" />
-      <label>Player Name</label>
-      <input type="text" id="playerInput" />
-      <label>Color</label>
-      <input type="color" id="colorInput" />
+      <label>Player</label>
+      <select id="playerSelect"></select>
       <div>
         <button id="saveBtn">Save</button>
         <button onclick="editDialog.close()">Cancel</button>
@@ -94,20 +106,25 @@
 
       <div class="section-divider"></div>
       <label>Conquer This Tile</label>
-      <input type="text" id="conquerPlayerInput" placeholder="Conqueror name" />
-      <input type="color" id="conquerColorInput" />
+      <select id="conquerPlayerSelect"></select>
       <button type="button" id="conquerBtn">Conquer</button>
     </form>
   </dialog>
 
   <script>
+    const players = [
+      { name: "Alice", color: "#e74c3c" },
+      { name: "Bob", color: "#3498db" },
+      { name: "Charlie", color: "#27ae60" },
+      { name: "Diana", color: "#f39c12" }
+    ];
+
     const grid = document.getElementById("grid");
+    const playerList = document.getElementById("playerList");
     const dialog = document.getElementById("editDialog");
     const categoryInput = document.getElementById("categoryInput");
-    const playerInput = document.getElementById("playerInput");
-    const colorInput = document.getElementById("colorInput");
-    const conquerPlayerInput = document.getElementById("conquerPlayerInput");
-    const conquerColorInput = document.getElementById("conquerColorInput");
+    const playerSelect = document.getElementById("playerSelect");
+    const conquerPlayerSelect = document.getElementById("conquerPlayerSelect");
     const saveBtn = document.getElementById("saveBtn");
     const conquerBtn = document.getElementById("conquerBtn");
 
@@ -118,6 +135,32 @@
     }));
 
     let currentTileIndex = null;
+
+    function renderPlayerList() {
+      playerList.innerHTML = '';
+      players.forEach(p => {
+        const badge = document.createElement('div');
+        badge.className = 'player-badge';
+        badge.style.backgroundColor = p.color;
+        badge.textContent = p.name;
+        playerList.appendChild(badge);
+      });
+    }
+
+    function populateSelect(selectElement) {
+      selectElement.innerHTML = '';
+      players.forEach(player => {
+        const option = document.createElement('option');
+        option.value = player.name;
+        option.textContent = player.name;
+        selectElement.appendChild(option);
+      });
+    }
+
+    function getPlayerColor(name) {
+      const player = players.find(p => p.name === name);
+      return player ? player.color : '#ffffff';
+    }
 
     function renderGrid() {
       grid.innerHTML = "";
@@ -140,10 +183,8 @@
         tileEl.onclick = () => {
           currentTileIndex = i;
           categoryInput.value = tile.category;
-          playerInput.value = tile.player;
-          colorInput.value = tile.color;
-          conquerPlayerInput.value = '';
-          conquerColorInput.value = '#ffffff';
+          playerSelect.value = tile.player;
+          conquerPlayerSelect.value = '';
           dialog.showModal();
         };
 
@@ -153,25 +194,34 @@
 
     saveBtn.onclick = () => {
       if (currentTileIndex !== null) {
+        const selectedPlayer = playerSelect.value;
         tiles[currentTileIndex].category = categoryInput.value;
-        tiles[currentTileIndex].player = playerInput.value;
-        tiles[currentTileIndex].color = colorInput.value;
+        tiles[currentTileIndex].player = selectedPlayer;
+        tiles[currentTileIndex].color = getPlayerColor(selectedPlayer);
         renderGrid();
         dialog.close();
       }
     };
 
     conquerBtn.onclick = () => {
-      if (currentTileIndex !== null && conquerPlayerInput.value.trim()) {
-        tiles[currentTileIndex].player = conquerPlayerInput.value;
-        tiles[currentTileIndex].color = conquerColorInput.value;
+      if (currentTileIndex !== null) {
+        const conqueror = conquerPlayerSelect.value;
+        tiles[currentTileIndex].player = conqueror;
+        tiles[currentTileIndex].color = getPlayerColor(conqueror);
         renderGrid();
         dialog.close();
       }
     };
 
+    function pickRandomPlayer() {
+      const random = players[Math.floor(Math.random() * players.length)];
+      alert(`🎉 ${random.name} was chosen to play!`);
+    }
+
+    populateSelect(playerSelect);
+    populateSelect(conquerPlayerSelect);
+    renderPlayerList();
     renderGrid();
   </script>
 </body>
 </html>
-
