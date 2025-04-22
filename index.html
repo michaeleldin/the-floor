@@ -113,7 +113,6 @@
 <body>
   <h1>The Floor</h1>
   <button onclick="pickRandomPlayer()">🎲 Pick Random Player</button>
-  <button onclick="pickRandomTile()">📦 Pick Random Tile</button>
   <button onclick="checkWinner()">🏆 Check Winner</button>
   <div id="winnerAnnouncement"></div>
   <div class="player-list" id="playerList"></div>
@@ -279,23 +278,6 @@
       }
       const random = activePlayers[Math.floor(Math.random() * activePlayers.length)];
       alert(`🎉 ${random.name} was chosen to play!`);
-    }
-
-    function pickRandomTile() {
-      const claimedTiles = tiles
-        .map((t, i) => ({ ...t, index: i }))
-        .filter(t => t.player);
-      if (claimedTiles.length === 0) {
-        alert("No claimed tiles to choose from.");
-        return;
-      }
-      const random = claimedTiles[Math.floor(Math.random() * claimedTiles.length)];
-      currentTileIndex = random.index;
-      categoryInput.value = random.category;
-      playerSelect.value = random.player;
-      conquerPlayerSelect.value = '';
-      highlightSelectOption(playerSelect, random.player);
-      dialog.showModal();
     }
 
     function checkWinner() {
