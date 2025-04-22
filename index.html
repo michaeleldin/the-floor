@@ -271,12 +271,23 @@
     conquerBtn.onclick = () => {
       if (currentTileIndex !== null) {
         const conqueror = conquerPlayerSelect.value;
+        const loser = tiles[currentTileIndex].player;
         const conquerorCategory = getPlayerCategory(conqueror);
         tiles[currentTileIndex].player = conqueror;
         tiles[currentTileIndex].color = getPlayerColor(conqueror);
         if (conquerorCategory) {
           tiles[currentTileIndex].category = conquerorCategory;
         }
+        // Transfer all tiles from the loser to the conqueror
+        tiles.forEach(tile => {
+          if (tile.player === loser) {
+            tile.player = conqueror;
+            tile.color = getPlayerColor(conqueror);
+            if (conquerorCategory) {
+              tile.category = conquerorCategory;
+            }
+          }
+        });
         renderGrid();
         dialog.close();
       }
